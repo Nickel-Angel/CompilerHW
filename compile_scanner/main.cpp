@@ -3,16 +3,17 @@
 
 #include "scanner.h"
 
-char filename[10];
+char filename[10] = "test.txt";
 
 int main() {
-	printf("Please input source file name:\n");
-	scanf("%s", filename);
-	FILE* fp = fopen(filename, "r");
-	while (fp == nullptr) {
+	//printf("Please input source file name:\n");
+	//scanf_s("%s", filename, 9);
+	FILE* fp = nullptr;
+	errno_t err = fopen_s(&fp, filename, "r");
+	while (err != 0) {
 		printf("Fail to Open the file, please check your file name.\n");
-		scanf("%s", filename);
-		fp = fopen(filename, "r");
+		scanf_s("%s", filename);
+		err = fopen_s(&fp, filename, "r");
 	}
 	while (!feof(fp)) {
 		if (!main_scanner(fp)) {

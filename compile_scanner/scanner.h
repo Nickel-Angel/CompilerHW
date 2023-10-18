@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <cctype>
 #include <cstring>
+#include <string>
 
 bool main_scanner(FILE*);
 

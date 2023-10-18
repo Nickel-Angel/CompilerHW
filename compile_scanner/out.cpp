@@ -15,15 +15,15 @@ constexpr char* Labels[MAX_LABEL_NUMBER] = {
 };
 
 void out(int labelNum, char* id) {
-	printf("(%s, %s)\n", Labels[labelNum], id);
+	printf("(%s, %s)\n", Labels[labelNum - 1], id);
 }
 
 void out(int labelNum, int x) {
-    printf("(%s, %d)\n", Labels[labelNum], x);
+    printf("(%s, %d)\n", Labels[labelNum - 1], x);
 }
 
 void out(int labelNum, double x) {
-    printf("(%s, %lf)\n", Labels[labelNum], x);
+    printf("(%s, %g)\n", Labels[labelNum - 1], x);
 }
 
 void report_error(char* error) {

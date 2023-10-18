@@ -51,7 +51,7 @@ private:
             ++dot;
             break;
         case 2:
-            power = power * 10 + power - '0';
+            power = power * 10 + preLabel - '0';
             break;
         default:
             break;
@@ -80,7 +80,7 @@ private:
         for (int i = 0; i < 10; ++i) {
             SetNext(u, v, '0' + i);
         }
-        action[u][v] = addNewDigit;
+        action[u][v] = &RealDFA::addNewDigit;
     }
 
 public:
@@ -89,27 +89,27 @@ public:
         // 0
         SetNext(0, 1, '+');
         SetNext(0, 1, '-');
-        action[0][1] = changeNeg;
+        action[0][1] = &RealDFA::changeNeg;
         SetNext(0, 4, '.');
-        action[0][4] = changeStateToDec;
+        action[0][4] = &RealDFA::changeStateToDec;
         SetNumberNext(0, 2);
         // 1
         SetNumberNext(1, 2);
         SetNext(1, 4, '.');
-        action[1][4] = changeStateToDec;
+        action[1][4] = &RealDFA::changeStateToDec;
         // 2
         SetNumberNext(2, 2);
         SetNext(2, 3, '.');
-        action[2][3] = changeStateToDec;
+        action[2][3] = &RealDFA::changeStateToDec;
         SetNext(2, 5, 'e');
         SetNext(2, 5, 'E');
-        action[2][5] = changeStateToPower;
+        action[2][5] = &RealDFA::changeStateToPower;
         SetTerminal(2, true);
         // 3
         SetNumberNext(3, 3);
         SetNext(3, 5, 'e');
         SetNext(3, 5, 'E');
-        action[3][5] = changeStateToPower;
+        action[3][5] = &RealDFA::changeStateToPower;
         SetTerminal(3, true);
         // 4
         SetNumberNext(4, 3);
@@ -117,7 +117,7 @@ public:
         SetNumberNext(5, 7);
         SetNext(5, 6, '+');
         SetNext(5, 6, '-');
-        action[5][6] = changeNeg;
+        action[5][6] = &RealDFA::changeNeg;
         // 6
         SetNumberNext(6, 7);
         // 7
@@ -208,33 +208,33 @@ public:
         // 0
         SetNext(0, 1, '+');
         SetNext(0, 1, '-');
-        action[0][1] = changeNeg;
+        action[0][1] = &IntDFA::changeNeg;
         for (int i = 1; i < 10; ++i) {
             SetNext(0, 2, '0' + i);
         }
-        action[0][2] = addNewDigit;
+        action[0][2] = &IntDFA::addNewDigit;
         SetNext(0, 3, '0');
-        action[0][3] = changeBase;
+        action[0][3] = &IntDFA::changeBase;
         // 1
         for (int i = 1; i < 10; ++i) {
             SetNext(1, 2, '0' + i);
         }
-        action[1][2] = addNewDigit;
+        action[1][2] = &IntDFA::addNewDigit;
         SetNext(1, 3, '0');
-        action[1][3] = changeBase;
+        action[1][3] = &IntDFA::changeBase;
         // 2
         for (int i = 0; i < 10; ++i) {
             SetNext(2, 2, '0' + i);
         }
-        action[2][2] = addNewDigit;
+        action[2][2] = &IntDFA::addNewDigit;
         SetTerminal(2, true);
         // 3
         for (int i = 0; i < 8; ++i) {
             SetNext(3, 5, '0' + i);
         }
-        action[3][5] = addNewDigit;
+        action[3][5] = &IntDFA::addNewDigit;
         SetNext(3, 4, 'x');
-        action[3][4] = changeBase;
+        action[3][4] = &IntDFA::changeBase;
         SetTerminal(3, true);
         // 4
         for (int i = 0; i < 10; ++i) {
@@ -244,13 +244,13 @@ public:
             SetNext(4, 4, 'a' + i);
             SetNext(4, 4, 'A' + i);
         }
-        action[4][4] = addNewDigit;
+        action[4][4] = &IntDFA::addNewDigit;
         SetTerminal(4, true);
         // 5
         for (int i = 0; i < 8; ++i) {
             SetNext(5, 5, '0' + i);
         }
-        action[5][5] = addNewDigit;
+        action[5][5] = &IntDFA::addNewDigit;
         SetTerminal(5, true);
     }
 
@@ -280,6 +280,13 @@ public:
 RealDFA realDFA;
 IntDFA intDFA;
 
+void clearTOKEN() {
+    int length = strlen(TOKEN);
+    for (int i = 0; i < length; ++i) {
+        TOKEN[i] = '\0';
+    }
+}
+
 bool main_scanner(FILE* fp)
 {
     char ch;
@@ -295,7 +302,9 @@ bool main_scanner(FILE* fp)
             ch = fgetc(fp);
         }
         TOKEN[i] = '\0';
-        fseek(fp, -1, 1); /*retract*/
+        if (!feof(fp)) {
+            fseek(fp, -1, 1); /*retract*/
+        }
         c = lookup(TOKEN);
         if (c == 0) {
             out(ID, TOKEN); // To do: identify the ID
@@ -307,7 +316,7 @@ bool main_scanner(FILE* fp)
         ch = fgetc(fp);
         i = 1;
         bool isReal = false;
-        while ((isdigit(ch) || ch == 'e' || ch == 'E' || ch == '.') || i < 19) {
+        while ((isdigit(ch) || ch == 'e' || ch == 'E' || ch == '.' || ch == '+' || ch == '-') && i < 19) {
             if (ch == 'e' || ch == 'E' || ch == '.') {
                 isReal = true;
             }
@@ -316,13 +325,16 @@ bool main_scanner(FILE* fp)
             ch = fgetc(fp);
         }
         TOKEN[i] = '\0';
-        fseek(fp, -1, 1);
+        if (!feof(fp)) {
+            fseek(fp, -1, 1);
+        }
         if (isReal) {
             double x = 0;
             if (realDFA.Query((char*)TOKEN, x)) {
                 out(REAL, x); // To do: identify int and float number
             } else {
-                report_error(strcat((char*)"Can't identify the real number ", TOKEN));
+                std::string err = "Can't identify the real number ";
+                report_error((char*)((err + TOKEN).c_str()));
                 return false;
             }
         } else {
@@ -330,33 +342,38 @@ bool main_scanner(FILE* fp)
             if (intDFA.Query((char*)TOKEN, x)) {
                 out(INT, x);
             } else {
-                report_error(strcat((char*)"Can't identify the integer ", TOKEN));
+                std::string err = "Can't identify the real number ";
+                report_error((char*)((err + TOKEN).c_str()));
                 return false;
             }
         }
         
     } else {
         switch (ch) {
-        case '£¼':
+        case '<':
             ch = fgetc(fp);
             if (ch == '=') {
                 out(LE, (char*)" ");
             } else if (ch == '£¾') {
                 out(NE, (char*)" ");
             } else {
-                fseek(fp, -1, 1);
+                if (!feof(fp)) {
+                    fseek(fp, -1, 1);
+                }
                 out(LT, (char*)" ");
             }
             break;
         case '=':
             out(EQ, (char*)" ");
             break;
-        case '£¾':
+        case '>':
             ch = fgetc(fp);
             if (ch == '=') {
                 out(GE, (char*)" ");
             } else {
-                fseek(fp, -1, 1);
+                if (!feof(fp)) {
+                    fseek(fp, -1, 1);
+                }
                 out(GT, (char*)" ");
             }
             break;
