@@ -28,6 +28,10 @@ enum ClassLabel {
 
 char TOKEN[20];
 
+struct DFAResult {
+
+};
+
 class RealDFA : public DFA {    
 private:
     bool iNegative, pNegative;
@@ -125,7 +129,7 @@ public:
         SetTerminal(7, true);
     }
 
-    bool Query(char* token, double &x) {
+    bool Query(char* token, std::variant<int, double> &x) {
         initState();
         x = 0;
         int length = strlen(token), preNode = 0, curNode = 0;
@@ -140,6 +144,9 @@ public:
         }
         if (!nodeList[curNode].IsTerminal())
             return false;
+        if (state == 1) {
+
+        }
         x = decimal;
         for (int i = 0; i < dot; ++i) {
             x *= 0.1;
@@ -289,8 +296,12 @@ void clearTOKEN() {
 
 bool main_scanner(FILE* fp)
 {
-    char ch;
+    static char ch = '\0';
     int i, c;
+    if (ch == EOF) {
+        ch = fgetc(fp);
+        return true;
+    }
     ch = fgetc(fp);
     if (isalpha(ch)) { /*it must be a identifer!*/
         TOKEN[0] = ch;
@@ -302,9 +313,7 @@ bool main_scanner(FILE* fp)
             ch = fgetc(fp);
         }
         TOKEN[i] = '\0';
-        if (!feof(fp)) {
-            fseek(fp, -1, 1); /*retract*/
-        }
+        fseek(fp, -1, 1); /*retract*/
         c = lookup(TOKEN);
         if (c == 0) {
             out(ID, TOKEN); // To do: identify the ID
@@ -325,9 +334,7 @@ bool main_scanner(FILE* fp)
             ch = fgetc(fp);
         }
         TOKEN[i] = '\0';
-        if (!feof(fp)) {
-            fseek(fp, -1, 1);
-        }
+        fseek(fp, -1, 1);
         if (isReal) {
             double x = 0;
             if (realDFA.Query((char*)TOKEN, x)) {
@@ -357,9 +364,7 @@ bool main_scanner(FILE* fp)
             } else if (ch == '£¾') {
                 out(NE, (char*)" ");
             } else {
-                if (!feof(fp)) {
-                    fseek(fp, -1, 1);
-                }
+                fseek(fp, -1, 1);
                 out(LT, (char*)" ");
             }
             break;
@@ -371,9 +376,7 @@ bool main_scanner(FILE* fp)
             if (ch == '=') {
                 out(GE, (char*)" ");
             } else {
-                if (!feof(fp)) {
-                    fseek(fp, -1, 1);
-                }
+                fseek(fp, -1, 1);
                 out(GT, (char*)" ");
             }
             break;
@@ -393,7 +396,7 @@ bool main_scanner(FILE* fp)
             out(DI, (char*)" ");
             break;
         default:
-            if (feof(fp) || ch == ' ' || ch == '\n' || ch == '\r' || ch == '\0') {
+            if (ch == ' ' || ch == '\n' || ch == '\r' || ch == '\0') {
                 return true;
             }
             report_error((char*)"unknown identifier");

@@ -6,6 +6,7 @@
 #include <cctype>
 #include <cstring>
 #include <string>
+#include <variant>
 
 bool main_scanner(FILE*);
 
