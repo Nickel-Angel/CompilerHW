@@ -10,6 +10,7 @@ int main() {
 	//scanf_s("%s", filename, 9);
 	FILE* fp = nullptr;
 	errno_t err = fopen_s(&fp, filename, "r");
+	// freopen("result.txt", "w", stdout);
 	while (err != 0) {
 		printf("Fail to Open the file, please check your file name.\n");
 		scanf_s("%s", filename);

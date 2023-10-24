@@ -28,10 +28,6 @@ enum ClassLabel {
 
 char TOKEN[20];
 
-struct DFAResult {
-
-};
-
 class RealDFA : public DFA {    
 private:
     bool iNegative, pNegative;
@@ -129,7 +125,7 @@ public:
         SetTerminal(7, true);
     }
 
-    bool Query(char* token, std::variant<int, double> &x) {
+    bool Query(char* token, double &x) {
         initState();
         x = 0;
         int length = strlen(token), preNode = 0, curNode = 0;
@@ -144,9 +140,6 @@ public:
         }
         if (!nodeList[curNode].IsTerminal())
             return false;
-        if (state == 1) {
-
-        }
         x = decimal;
         for (int i = 0; i < dot; ++i) {
             x *= 0.1;
@@ -389,6 +382,12 @@ bool main_scanner(FILE* fp)
                 return false;
             }
             break;
+        case '+':
+            out(PL, (char*)" ");
+            break;
+        case '-':
+            out(MI, (char*)" ");
+            break;
         case '*':
             out(MU, (char*)" ");
             break;
@@ -396,7 +395,7 @@ bool main_scanner(FILE* fp)
             out(DI, (char*)" ");
             break;
         default:
-            if (ch == ' ' || ch == '\n' || ch == '\r' || ch == '\0') {
+            if (ch == EOF || ch == ' ' || ch == '\n' || ch == '\r' || ch == '\0' || ch == '\t') {
                 return true;
             }
             report_error((char*)"unknown identifier");
