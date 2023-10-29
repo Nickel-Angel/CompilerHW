@@ -30,13 +30,13 @@ char TOKEN[20];
 
 class RealDFA : public DFA {    
 private:
-    bool iNegative, pNegative;
+    bool pNegative;
     int preLabel, state; // 0: integer 1: decimal 2: power
     int integer, power, decimal, dot;
-    void(RealDFA::*action[8][8])();
+    void(RealDFA::*action[7][7])();
 
     void initState() {
-        iNegative = false, pNegative = false;
+        pNegative = false;
         preLabel = 0, state = 0;
         integer = 0, power = 0, decimal = 0, dot = 0;
     }
@@ -59,13 +59,7 @@ private:
     }
 
     void changeNeg() {
-        if (preLabel == '-') {
-            if (state == 0) {
-                iNegative = true;
-            } else {
-                pNegative = true;
-            }
-        }
+        pNegative = true;
     }
 
     void changeStateToDec() {
@@ -87,42 +81,35 @@ public:
     RealDFA() : DFA(8, 0) {
         initState();
         // 0
-        SetNext(0, 1, '+');
-        SetNext(0, 1, '-');
-        action[0][1] = &RealDFA::changeNeg;
-        SetNext(0, 4, '.');
-        action[0][4] = &RealDFA::changeStateToDec;
-        SetNumberNext(0, 2);
+        SetNext(0, 3, '.');
+        action[0][3] = &RealDFA::changeStateToDec;
+        SetNumberNext(0, 1);
         // 1
-        SetNumberNext(1, 2);
-        SetNext(1, 4, '.');
-        action[1][4] = &RealDFA::changeStateToDec;
+        SetNumberNext(1, 1);
+        SetNext(1, 2, '.');
+        action[1][2] = &RealDFA::changeStateToDec;
+        SetNext(1, 4, 'e');
+        SetNext(1, 4, 'E');
+        action[1][4] = &RealDFA::changeStateToPower;
+        SetTerminal(1, true);
         // 2
         SetNumberNext(2, 2);
-        SetNext(2, 3, '.');
-        action[2][3] = &RealDFA::changeStateToDec;
-        SetNext(2, 5, 'e');
-        SetNext(2, 5, 'E');
-        action[2][5] = &RealDFA::changeStateToPower;
+        SetNext(2, 4, 'e');
+        SetNext(2, 4, 'E');
+        action[2][4] = &RealDFA::changeStateToPower;
         SetTerminal(2, true);
         // 3
-        SetNumberNext(3, 3);
-        SetNext(3, 5, 'e');
-        SetNext(3, 5, 'E');
-        action[3][5] = &RealDFA::changeStateToPower;
-        SetTerminal(3, true);
+        SetNumberNext(3, 2);
         // 4
-        SetNumberNext(4, 3);
+        SetNumberNext(4, 6);
+        SetNext(4, 5, '+');
+        SetNext(4, 5, '-');
+        action[4][5] = &RealDFA::changeNeg;
         // 5
-        SetNumberNext(5, 7);
-        SetNext(5, 6, '+');
-        SetNext(5, 6, '-');
-        action[5][6] = &RealDFA::changeNeg;
+        SetNumberNext(5, 6);
         // 6
-        SetNumberNext(6, 7);
-        // 7
-        SetNumberNext(7, 7);
-        SetTerminal(7, true);
+        SetNumberNext(6, 6);
+        SetTerminal(6, true);
     }
 
     bool Query(char* token, double &x) {
@@ -148,22 +135,17 @@ public:
         for (int i = 0; i < power; ++i) {
             x *= pNegative ? 0.1 : 10;
         }
-        if (iNegative) {
-            x = -x;
-        }
         return true;
     }
 };
 
 class IntDFA : public DFA {
 private:
-    bool Negative;
     int preLabel, base;
     int result;
-    void(IntDFA::*action[6][6])();
+    void(IntDFA::*action[5][5])();
 
     void initState() {
-        Negative = false;
         preLabel = 0, base = 10;
         result = 0;
     }
@@ -188,12 +170,6 @@ private:
         result = result * base + preLabel - '0';
     }
 
-    void changeNeg() {
-        if (preLabel == '-') {
-            Negative = true;
-        }
-    }
-
     void changeBase() {
         if (preLabel == '0') {
             base = 8;
@@ -203,55 +179,45 @@ private:
     }
 
 public:
-    IntDFA() : DFA(6, 0) {
+    IntDFA() : DFA(5, 0) {
         initState();
         // 0
-        SetNext(0, 1, '+');
-        SetNext(0, 1, '-');
-        action[0][1] = &IntDFA::changeNeg;
         for (int i = 1; i < 10; ++i) {
-            SetNext(0, 2, '0' + i);
+            SetNext(0, 1, '0' + i);
         }
-        action[0][2] = &IntDFA::addNewDigit;
-        SetNext(0, 3, '0');
-        action[0][3] = &IntDFA::changeBase;
+        action[0][1] = &IntDFA::addNewDigit;
+        SetNext(0, 2, '0');
+        action[0][2] = &IntDFA::changeBase;
         // 1
-        for (int i = 1; i < 10; ++i) {
-            SetNext(1, 2, '0' + i);
-        }
-        action[1][2] = &IntDFA::addNewDigit;
-        SetNext(1, 3, '0');
-        action[1][3] = &IntDFA::changeBase;
-        // 2
         for (int i = 0; i < 10; ++i) {
-            SetNext(2, 2, '0' + i);
+            SetNext(1, 1, '0' + i);
         }
-        action[2][2] = &IntDFA::addNewDigit;
+        action[1][1] = &IntDFA::addNewDigit;
+        SetTerminal(1, true);
+        // 2
+        for (int i = 0; i < 8; ++i) {
+            SetNext(2, 4, '0' + i);
+        }
+        action[2][4] = &IntDFA::addNewDigit;
+        SetNext(2, 3, 'x');
+        action[2][3] = &IntDFA::changeBase;
         SetTerminal(2, true);
         // 3
-        for (int i = 0; i < 8; ++i) {
-            SetNext(3, 5, '0' + i);
-        }
-        action[3][5] = &IntDFA::addNewDigit;
-        SetNext(3, 4, 'x');
-        action[3][4] = &IntDFA::changeBase;
-        SetTerminal(3, true);
-        // 4
         for (int i = 0; i < 10; ++i) {
-            SetNext(4, 4, '0' + i);
+            SetNext(3, 3, '0' + i);
         }
         for (int i = 0; i < 6; ++i) {
-            SetNext(4, 4, 'a' + i);
-            SetNext(4, 4, 'A' + i);
+            SetNext(3, 3, 'a' + i);
+            SetNext(3, 3, 'A' + i);
+        }
+        action[3][3] = &IntDFA::addNewDigit;
+        SetTerminal(3, true);
+        // 4
+        for (int i = 0; i < 8; ++i) {
+            SetNext(4, 4, '0' + i);
         }
         action[4][4] = &IntDFA::addNewDigit;
         SetTerminal(4, true);
-        // 5
-        for (int i = 0; i < 8; ++i) {
-            SetNext(5, 5, '0' + i);
-        }
-        action[5][5] = &IntDFA::addNewDigit;
-        SetTerminal(5, true);
     }
 
     bool Query(char* token, int& x) {
@@ -270,22 +236,12 @@ public:
         if (!nodeList[curNode].IsTerminal())
             return false;
         x = result;
-        if (Negative) {
-            x = -x;
-        }
         return true;
     }
 };
 
 RealDFA realDFA;
 IntDFA intDFA;
-
-void clearTOKEN() {
-    int length = strlen(TOKEN);
-    for (int i = 0; i < length; ++i) {
-        TOKEN[i] = '\0';
-    }
-}
 
 bool main_scanner(FILE* fp)
 {
@@ -318,8 +274,19 @@ bool main_scanner(FILE* fp)
         ch = fgetc(fp);
         i = 1;
         bool isReal = false;
+        bool preE = false;
         while ((isdigit(ch) || ch == 'e' || ch == 'E' || ch == '.' || ch == '+' || ch == '-') && i < 19) {
-            if (ch == 'e' || ch == 'E' || ch == '.') {
+            if (ch == '+' || ch == '-') {
+                if (!preE) {
+                    break;
+                }
+            }
+            preE = false;
+            if (ch == '.') {
+                isReal = true;
+            }
+            if (ch == 'E' || ch == 'e') {
+                preE = true;
                 isReal = true;
             }
             TOKEN[i] = ch;
@@ -342,7 +309,7 @@ bool main_scanner(FILE* fp)
             if (intDFA.Query((char*)TOKEN, x)) {
                 out(INT, x);
             } else {
-                std::string err = "Can't identify the real number ";
+                std::string err = "Can't identify the Integer ";
                 report_error((char*)((err + TOKEN).c_str()));
                 return false;
             }
