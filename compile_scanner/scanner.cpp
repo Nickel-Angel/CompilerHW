@@ -1,7 +1,4 @@
 #include "scanner.h"
-#include "lookup.h"
-#include "out.h"
-#include "dfa.h"
 
 enum ClassLabel {
     BEGIN = 1, // 1
@@ -243,6 +240,12 @@ public:
 RealDFA realDFA;
 IntDFA intDFA;
 
+static int currentRow;
+
+void set_current_row(int startCount) {
+    currentRow = startCount;
+}
+
 bool main_scanner(FILE* fp)
 {
     static char ch = '\0';
@@ -301,7 +304,7 @@ bool main_scanner(FILE* fp)
                 out(REAL, x); // To do: identify int and float number
             } else {
                 std::string err = "Can't identify the real number ";
-                report_error((char*)((err + TOKEN).c_str()));
+                report_error((char*)((err + TOKEN).c_str()), currentRow);
                 return false;
             }
         } else {
@@ -310,7 +313,7 @@ bool main_scanner(FILE* fp)
                 out(INT, x);
             } else {
                 std::string err = "Can't identify the Integer ";
-                report_error((char*)((err + TOKEN).c_str()));
+                report_error((char*)((err + TOKEN).c_str()), currentRow);
                 return false;
             }
         }
@@ -345,7 +348,7 @@ bool main_scanner(FILE* fp)
             if (ch == '=') {
                 out(IS, (char*)" ");
             } else {
-                report_error((char*)"expect = after token :");
+                report_error((char*)"expect = after token :", currentRow);
                 return false;
             }
             break;
@@ -362,10 +365,14 @@ bool main_scanner(FILE* fp)
             out(DI, (char*)" ");
             break;
         default:
-            if (ch == EOF || ch == ' ' || ch == '\n' || ch == '\r' || ch == '\0' || ch == '\t') {
+            if (ch == '\n') {
+                ++currentRow;
                 return true;
             }
-            report_error((char*)"unknown identifier");
+            if (ch == EOF || ch == ' ' || ch == '\r' || ch == '\0' || ch == '\t') {
+                return true;
+            }
+            report_error((char*)"unknown identifier", currentRow);
             return false;
             break;
         }

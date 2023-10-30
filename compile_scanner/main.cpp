@@ -16,6 +16,8 @@ int main() {
 		scanf_s("%s", filename);
 		err = fopen_s(&fp, filename, "r");
 	}
+	set_current_row(0);
+	set_outMode(0);
 	while (!feof(fp)) {
 		if (!main_scanner(fp)) {
 			break;
