@@ -48,10 +48,14 @@ void out(int labelNum, double x) {
     preResult = x;
 }
 
+int getScanLabel() {
+    return preLabelNum;
+}
+
 std::variant<char*, int, double> getScanResult() {
     return preResult; // notice: the validation of the return value is UNCHECKED!!
 }
 
 void report_error(char* error, int currentRow) {
-    printf("%s in line %d\n", error, currentRow);
+    printf("%s on line %d\n", error, currentRow);
 }
