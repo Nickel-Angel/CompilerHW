@@ -268,7 +268,7 @@ bool main_scanner(FILE* fp)
         fseek(fp, -1, 1); /*retract*/
         c = lookup(TOKEN);
         if (c == 0) {
-            out(ID, TOKEN); // To do: identify the ID
+            out(ID, TOKEN);
         } else {
             out(c, (char*)" ");
         }
@@ -301,7 +301,7 @@ bool main_scanner(FILE* fp)
         if (isReal) {
             double x = 0;
             if (realDFA.Query((char*)TOKEN, x)) {
-                out(REAL, x); // To do: identify int and float number
+                out(REAL, x);
             } else {
                 std::string err = "Can't identify the real number ";
                 report_error((char*)((err + TOKEN).c_str()), currentRow);
