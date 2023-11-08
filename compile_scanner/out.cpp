@@ -1,6 +1,6 @@
 #include "out.h"
 
-constexpr auto MAX_LABEL_NUMBER = 20;
+constexpr auto MAX_LABEL_NUMBER = 22;
 constexpr char* Labels[MAX_LABEL_NUMBER] = {
     (char*)"BEGIN", (char*)"END", (char*)"CONST",
     (char*)"VAR", (char*)"IF", (char*)"ELSE",
@@ -8,7 +8,8 @@ constexpr char* Labels[MAX_LABEL_NUMBER] = {
     (char*)"LT", (char*)"LE",  (char*)"EQ",
     (char*)"NE", (char*)"GT",  (char*)"GE",
     (char*)"IS", (char*)"PL",  (char*)"MI", 
-    (char*)"MU", (char*)"DI"
+    (char*)"MU", (char*)"DI",  (char*)"LBU",
+    (char*)"RBU"
 };
 
 static int outMode = 0; // 0: stdout 1: load

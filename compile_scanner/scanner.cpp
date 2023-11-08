@@ -10,17 +10,19 @@ enum ClassLabel {
     ID,        // 7
     INT,       // 8
     REAL,      // 9
-    LT,        // 10
-    LE,        // 11
-    EQ,        // 12
-    NE,        // 13
-    GT,        // 14
-    GE,        // 15
-    IS,        // 16
-    PL,        // 17
-    MI,        // 18
-    MU,        // 19
-    DI         // 20
+    LT,        // 10 <
+    LE,        // 11 <=
+    EQ,        // 12 =
+    NE,        // 13 <>
+    GT,        // 14 >
+    GE,        // 15 >=
+    IS,        // 16 :=
+    PL,        // 17 +
+    MI,        // 18 -
+    MU,        // 19 *
+    DI,        // 20 /
+    LBU,       // 21 (
+    RBU        // 22 )
 };
 
 char TOKEN[20];
@@ -363,6 +365,12 @@ bool main_scanner(FILE* fp)
             break;
         case '/':
             out(DI, (char*)" ");
+            break;
+        case '(':
+            out(LBU, (char*)" ");
+            break;
+        case ')':
+            out(RBU, (char*)" ");
             break;
         default:
             if (ch == '\n') {
