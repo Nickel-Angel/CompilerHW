@@ -252,8 +252,10 @@ bool main_scanner(FILE* fp)
 {
     static char ch = '\0';
     int i, c;
+    setIgnore(false);
     if (ch == EOF) {
-        ch = fgetc(fp);
+        fseek(fp, 0, SEEK_END);
+        getc(fp);
         return true;
     }
     ch = fgetc(fp);
@@ -295,7 +297,7 @@ bool main_scanner(FILE* fp)
                 isReal = true;
             }
             TOKEN[i] = ch;
-            i++;
+            ++i;
             ch = fgetc(fp);
         }
         TOKEN[i] = '\0';
@@ -325,54 +327,55 @@ bool main_scanner(FILE* fp)
         case '<':
             ch = fgetc(fp);
             if (ch == '=') {
-                out(LE, (char*)" ");
+                out(LE, (char*)"<=");
             } else if (ch == '£¾') {
-                out(NE, (char*)" ");
+                out(NE, (char*)"<>");
             } else {
                 fseek(fp, -1, 1);
-                out(LT, (char*)" ");
+                out(LT, (char*)"<");
             }
             break;
         case '=':
-            out(EQ, (char*)" ");
+            out(EQ, (char*)"=");
             break;
         case '>':
             ch = fgetc(fp);
             if (ch == '=') {
-                out(GE, (char*)" ");
+                out(GE, (char*)">=");
             } else {
                 fseek(fp, -1, 1);
-                out(GT, (char*)" ");
+                out(GT, (char*)">");
             }
             break;
         case ':':
             ch = fgetc(fp);
             if (ch == '=') {
-                out(IS, (char*)" ");
+                out(IS, (char*)":=");
             } else {
                 report_error((char*)"expect = after token :", currentRow);
                 return false;
             }
             break;
         case '+':
-            out(PL, (char*)" ");
+            out(PL, (char*)"+");
             break;
         case '-':
-            out(MI, (char*)" ");
+            out(MI, (char*)"-");
             break;
         case '*':
-            out(MU, (char*)" ");
+            out(MU, (char*)"*");
             break;
         case '/':
-            out(DI, (char*)" ");
+            out(DI, (char*)"/");
             break;
         case '(':
-            out(LBU, (char*)" ");
+            out(LBU, (char*)"(");
             break;
         case ')':
-            out(RBU, (char*)" ");
+            out(RBU, (char*)")");
             break;
         default:
+            setIgnore(true);
             if (ch == '\n') {
                 ++currentRow;
                 return true;

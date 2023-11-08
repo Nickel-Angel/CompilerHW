@@ -11,7 +11,9 @@ void set_outMode(int);
 void out(int, char*);
 void out(int, int);
 void out(int, double);
+void setIgnore(bool);
 
+bool getIgnore();
 int getScanLabel();
 std::variant<char*, int, double> getScanResult();
 

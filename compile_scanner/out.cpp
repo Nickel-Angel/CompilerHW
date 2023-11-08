@@ -12,6 +12,7 @@ constexpr char* Labels[MAX_LABEL_NUMBER] = {
     (char*)"RBU"
 };
 
+static bool ignore;
 static int outMode = 0; // 0: stdout 1: load
 static int preLabelNum;
 static std::variant<char*, int, double> preResult;
@@ -47,6 +48,14 @@ void out(int labelNum, double x) {
     }
     preLabelNum = labelNum;
     preResult = x;
+}
+
+void setIgnore(bool x) {
+    ignore = x;
+}
+
+bool getIgnore() {
+    return ignore;
 }
 
 int getScanLabel() {
