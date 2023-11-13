@@ -4,11 +4,11 @@ using namespace analyzer_label;
 using std::vector;
 using std::pair;
 
-constexpr int MAX_VN = 8;
 constexpr int MAX_STACK_SIZE = 1000;
 
 vector<pair<vocabulary, vector<vocabulary>>> LL1Table[MAX_VN];
-vocabulary scannerLabelToAnalyzerLabel[24]; // equals to MAX_LABEL_NUMBER in out.cpp
+vocabulary scannerLabelToAnalyzerLabel[MAX_SCANNER_LABEL_NUMBER + 1]; // start from 1
+bool printProcess;
 
 class ananlyzerStack {
 private:
@@ -43,6 +43,22 @@ public:
 	bool isempty() {
 		return StackTop == 0;
 	}
+
+	void print() {
+		print(0);
+	}
+
+	void print(int limit) {
+		for (int i = 0; i < StackTop; ++i) {
+			out(Stack[i]);
+			if (!Stack[i].isTerminal && (Stack[i].labelNum == Sp || Stack[i].labelNum == Ep || Stack[i].labelNum == Tp)) {
+				--limit;
+			}
+		}
+		for (int i = StackTop; i < limit; ++i) {
+			putchar(' ');
+		}
+	}
 };
 
 ananlyzerStack Stack;
@@ -66,12 +82,23 @@ void init_table() {
 	// S
 	temp.emplace_back(vocabulary(false, E));
 	temp.emplace_back(vocabulary(true, SEM));
+	temp.emplace_back(vocabulary(false, Sp));
 	LL1Table[S].emplace_back(vocabulary(true, ID), temp);
 	LL1Table[S].emplace_back(vocabulary(true, LBU), temp);
 
 	temp.clear();
 	temp.emplace_back(vocabulary(true, SEM));
 	LL1Table[S].emplace_back(vocabulary(true, SEM), temp);
+
+	// Sp
+	temp.clear();
+	temp.emplace_back(vocabulary(false, S));
+	LL1Table[Sp].emplace_back(vocabulary(true, ID), temp);
+	LL1Table[Sp].emplace_back(vocabulary(true, LBU), temp);
+	LL1Table[Sp].emplace_back(vocabulary(true, SEM), temp);
+
+	temp.clear();
+	LL1Table[Sp].emplace_back(vocabulary(true, FIN), temp);
 
 	// E
 	temp.clear();
@@ -91,7 +118,6 @@ void init_table() {
 	temp.clear();
 	LL1Table[Ep].emplace_back(vocabulary(true, RBU), temp); // Ep ) -> eps
 	LL1Table[Ep].emplace_back(vocabulary(true, SEM), temp); // Ep ; -> eps
-	LL1Table[Ep].emplace_back(vocabulary(true, FIN), temp); // Ep # -> eps
 
 	// T
 	temp.clear();
@@ -115,7 +141,6 @@ void init_table() {
 	temp.clear();
 	LL1Table[Tp].emplace_back(vocabulary(true, RBU), temp); // Tp ( -> eps
 	LL1Table[Tp].emplace_back(vocabulary(true, SEM), temp); // Tp ; -> eps 
-	LL1Table[Tp].emplace_back(vocabulary(true, FIN), temp); // Tp # -> eps
 
 	// F
 	temp.clear();
@@ -205,6 +230,12 @@ bool main_analyzer(vocabulary v, std::variant<char*, int, double> scannerResult)
 	while (true) {
 		if (Stack.top().isTerminal) {
 			if (Stack.top() == v) {
+				if (printProcess) { // process
+					Stack.print(12);
+					out(v);
+					puts("");
+				}
+
 				Stack.pop();
 				return true;
 			}
@@ -216,6 +247,14 @@ bool main_analyzer(vocabulary v, std::variant<char*, int, double> scannerResult)
 		auto& SubTable = LL1Table[Stack.top().labelNum];
 		for (auto& [vt, gen] : SubTable) {
 			if (vt == v) {
+				if (printProcess) { // process
+					Stack.print(12);
+					out(v);
+					printf("           ");
+					out(Stack.top(), gen);
+					puts("");
+				}
+
 				Stack.pop();
 				Stack.push(gen);
 				find = true;
@@ -230,24 +269,41 @@ bool main_analyzer(vocabulary v, std::variant<char*, int, double> scannerResult)
 	}
 }
 
+void set_print_process(bool mode) {
+	printProcess = mode;
+}
+
 void start_analyze(FILE* fp) {
 	init_table();
 	init_scanner();
 	init_stack(); // S will be put in the stack first
-	bool isSuccess = true;
+	bool isTotalSuccess = true;
+	bool isCurrentSuccess = true;
+	if (printProcess) {
+		printf("Stack  Current Label  Used Production\n"); // process table head
+	}
 	while (true) {
 		if (main_scanner(fp)) {
 			if (feof(fp)) {
-				isSuccess &= main_analyzer(vocabulary(true, FIN), (char*)"final #");
+				isCurrentSuccess &= main_analyzer(vocabulary(true, FIN), (char*)"final #");
+				isTotalSuccess &= isCurrentSuccess;
 				break;
 			}
-			if (getIgnore()) {
+			if (get_ignore()) {
 				continue;
 			}
-			isSuccess &= main_analyzer(scannerLabelToAnalyzerLabel[getScanLabel()], getScanResult());
+			if (!isCurrentSuccess) {
+				if (get_scan_label() == scanner_label::SEM) {
+					isCurrentSuccess = true;
+					init_stack();
+				}
+				continue;
+			}
+			isCurrentSuccess &= main_analyzer(scannerLabelToAnalyzerLabel[get_scan_label()], get_scan_result());
+			isTotalSuccess &= isCurrentSuccess;
 		}
 	}
-	if (isSuccess) {
+	if (isTotalSuccess) {
 		puts("Success Analyze!");
 	}
 }

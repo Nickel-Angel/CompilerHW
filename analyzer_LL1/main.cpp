@@ -13,6 +13,7 @@ int main()
 		scanf_s("%s", filename);
 		err = fopen_s(&fp, filename, "r");
 	}
+	set_print_process(true);
     start_analyze(fp);
 	fclose(fp);
 	return 0;

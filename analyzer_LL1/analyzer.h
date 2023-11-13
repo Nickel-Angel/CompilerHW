@@ -3,6 +3,7 @@
 #define _ANALYZER_H_
 
 #include "scanner.h"
+#include "analyzer_out.h"
 
 #include <vector>
 #include <utility>
@@ -18,6 +19,7 @@ struct vocabulary {
 	vocabulary(bool, int);
 };
 
+void set_print_process(bool);
 void start_analyze(FILE*);
 
 #endif // _ANALYZER_H_
