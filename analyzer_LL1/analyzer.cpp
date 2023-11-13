@@ -48,7 +48,10 @@ public:
 	}
 
 	vocabulary top() {
-		return Stack[StackTop];
+		if (StackTop > 0) {
+			return Stack[StackTop - 1];
+		}
+		return vocabulary();
 	}
 
 	void pop() {
@@ -71,7 +74,7 @@ vocabulary::vocabulary(bool isTerminal, int labelNum) {
 }
 
 bool vocabulary::operator == (const vocabulary& rhs) const {
-	return this->isTerminal == rhs.isTerminal && this->labelNum == rhs.labelNum;
+	return !this->isTerminal == !rhs.isTerminal && this->labelNum == rhs.labelNum;
 }
 
 void init_table() {
@@ -146,8 +149,10 @@ void init_table() {
 	temp.emplace_back(vocabulary(true, DI));
 	LL1Table[M].emplace_back(vocabulary(true, DI), temp); // M / -> /
 
-	// ID
+	// ID INT REAL
 	scannerLabelToAnalyzerLabel[7] = vocabulary(true, ID);
+	scannerLabelToAnalyzerLabel[8] = vocabulary(true, ID);
+	scannerLabelToAnalyzerLabel[9] = vocabulary(true, ID);
 	
 	// PL
 	scannerLabelToAnalyzerLabel[17] = vocabulary(true, PL);
@@ -178,25 +183,47 @@ void init_stack() {
 	Stack.push(vocabulary(false, E));
 }
 
-bool main_analyzer(vocabulary v) {
-	if (Stack.top().isTerminal) {
-		if (Stack.top() == v) {
-			Stack.pop();
-			return true;
+void report_error(std::variant<char*, int, double> scannerResult) {
+	switch (scannerResult.index()) {
+	case 0:
+		printf("error occur around %s token\n", std::get<0>(scannerResult));
+		break;
+	case 1:
+		printf("error occur around INT %d\n", std::get<1>(scannerResult));
+		break;
+	case 2:
+		printf("error occur around REAL %lf\n", std::get<2>(scannerResult));
+		break;
+	}
+}
+
+bool main_analyzer(vocabulary v, std::variant<char*, int, double> scannerResult) {
+	while (true) {
+		if (Stack.top().isTerminal) {
+			if (Stack.top() == v) {
+				Stack.pop();
+				return true;
+			}
+			// To do: report errors
+			report_error(scannerResult);
+			return false;
+		}
+		bool find = false;
+		auto& SubTable = LL1Table[Stack.top().labelNum];
+		for (auto& [vt, gen] : SubTable) {
+			if (vt == v) {
+				Stack.pop();
+				Stack.push(gen);
+				find = true;
+				break;
+			}
 		}
 		// To do: report errors
-		return false;
-	}
-	auto& SubTable = LL1Table[Stack.top().labelNum];
-	for (auto& [vt, gen] : SubTable) {
-		if (vt == v) {
-			Stack.pop();
-			Stack.push(gen);
-			return true;
+		if (!find) {
+			report_error(scannerResult);
+			return false;
 		}
 	}
-	// To do: report errors
-	return false;
 }
 
 void start_analyze(FILE* fp) {
@@ -207,10 +234,13 @@ void start_analyze(FILE* fp) {
 	while (true) {
 		if (main_scanner(fp)) {
 			if (feof(fp)) {
-				result &= main_analyzer(vocabulary(true, FIN));
+				result &= main_analyzer(vocabulary(true, FIN), (char*)"final #");
 				break;
 			}
-			result &= main_analyzer(scannerLabelToAnalyzerLabel[getScanLabel()]);
+			if (getIgnore()) {
+				continue;
+			}
+			result &= main_analyzer(scannerLabelToAnalyzerLabel[getScanLabel()], getScanResult());
 		}
 	}
 	if (result) {
