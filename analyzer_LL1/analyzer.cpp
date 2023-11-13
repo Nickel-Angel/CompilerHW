@@ -1,34 +1,14 @@
 #include "analyzer.h"
 
+using namespace analyzer_label;
 using std::vector;
 using std::pair;
 
-constexpr int MAX_VN = 7;
+constexpr int MAX_VN = 8;
 constexpr int MAX_STACK_SIZE = 1000;
 
 vector<pair<vocabulary, vector<vocabulary>>> LL1Table[MAX_VN];
-vocabulary scannerLabelToAnalyzerLabel[23];
-
-enum VT {
-	ID = 0,
-	PL,
-	MI,
-	MU,
-	DI,
-	LBU,
-	RBU,
-	FIN
-};
-
-enum VN {
-	E = 0,
-	Ep,
-	T,
-	Tp,
-	F,
-	A,
-	M
-};
+vocabulary scannerLabelToAnalyzerLabel[24]; // equals to MAX_LABEL_NUMBER in out.cpp
 
 class ananlyzerStack {
 private:
@@ -59,6 +39,10 @@ public:
 			--StackTop;
 		}
 	}
+
+	bool isempty() {
+		return StackTop == 0;
+	}
 };
 
 ananlyzerStack Stack;
@@ -79,7 +63,18 @@ bool vocabulary::operator == (const vocabulary& rhs) const {
 
 void init_table() {
 	vector<vocabulary> temp;
+	// S
+	temp.emplace_back(vocabulary(false, E));
+	temp.emplace_back(vocabulary(true, SEM));
+	LL1Table[S].emplace_back(vocabulary(true, ID), temp);
+	LL1Table[S].emplace_back(vocabulary(true, LBU), temp);
+
+	temp.clear();
+	temp.emplace_back(vocabulary(true, SEM));
+	LL1Table[S].emplace_back(vocabulary(true, SEM), temp);
+
 	// E
+	temp.clear();
 	temp.emplace_back(vocabulary(false, T));
 	temp.emplace_back(vocabulary(false, Ep));
 	LL1Table[E].emplace_back(vocabulary(true, ID), temp); // E i -> TEp
@@ -95,6 +90,7 @@ void init_table() {
 
 	temp.clear();
 	LL1Table[Ep].emplace_back(vocabulary(true, RBU), temp); // Ep ) -> eps
+	LL1Table[Ep].emplace_back(vocabulary(true, SEM), temp); // Ep ; -> eps
 	LL1Table[Ep].emplace_back(vocabulary(true, FIN), temp); // Ep # -> eps
 
 	// T
@@ -118,6 +114,7 @@ void init_table() {
 
 	temp.clear();
 	LL1Table[Tp].emplace_back(vocabulary(true, RBU), temp); // Tp ( -> eps
+	LL1Table[Tp].emplace_back(vocabulary(true, SEM), temp); // Tp ; -> eps 
 	LL1Table[Tp].emplace_back(vocabulary(true, FIN), temp); // Tp # -> eps
 
 	// F
@@ -150,27 +147,30 @@ void init_table() {
 	LL1Table[M].emplace_back(vocabulary(true, DI), temp); // M / -> /
 
 	// ID INT REAL
-	scannerLabelToAnalyzerLabel[7] = vocabulary(true, ID);
-	scannerLabelToAnalyzerLabel[8] = vocabulary(true, ID);
-	scannerLabelToAnalyzerLabel[9] = vocabulary(true, ID);
+	scannerLabelToAnalyzerLabel[scanner_label::ID] = vocabulary(true, ID);
+	scannerLabelToAnalyzerLabel[scanner_label::INT] = vocabulary(true, ID);
+	scannerLabelToAnalyzerLabel[scanner_label::REAL] = vocabulary(true, ID);
 	
 	// PL
-	scannerLabelToAnalyzerLabel[17] = vocabulary(true, PL);
+	scannerLabelToAnalyzerLabel[scanner_label::PL] = vocabulary(true, PL);
 	
 	// MI
-	scannerLabelToAnalyzerLabel[18] = vocabulary(true, MI);
+	scannerLabelToAnalyzerLabel[scanner_label::MI] = vocabulary(true, MI);
 	
 	// MU
-	scannerLabelToAnalyzerLabel[19] = vocabulary(true, MU);
+	scannerLabelToAnalyzerLabel[scanner_label::MU] = vocabulary(true, MU);
 	
 	// DI
-	scannerLabelToAnalyzerLabel[20] = vocabulary(true, DI);
+	scannerLabelToAnalyzerLabel[scanner_label::DI] = vocabulary(true, DI);
 
 	// LBU
-	scannerLabelToAnalyzerLabel[21] = vocabulary(true, LBU);
+	scannerLabelToAnalyzerLabel[scanner_label::LBU] = vocabulary(true, LBU);
 
 	// RBU
-	scannerLabelToAnalyzerLabel[22] = vocabulary(true, RBU);
+	scannerLabelToAnalyzerLabel[scanner_label::RBU] = vocabulary(true, RBU);
+
+	// SEM
+	scannerLabelToAnalyzerLabel[scanner_label::SEM] = vocabulary(true, SEM);
 }
 
 void init_scanner() {
@@ -179,22 +179,26 @@ void init_scanner() {
 }
 
 void init_stack() {
+	while (!Stack.isempty()) {
+		Stack.pop();
+	}
 	Stack.push(vocabulary(true, FIN));
-	Stack.push(vocabulary(false, E));
+	Stack.push(vocabulary(false, S));
 }
 
 void report_error(std::variant<char*, int, double> scannerResult) {
 	switch (scannerResult.index()) {
 	case 0:
-		printf("error occur around %s token\n", std::get<0>(scannerResult));
+		printf("error occur around %s token ", std::get<0>(scannerResult));
 		break;
 	case 1:
-		printf("error occur around INT %d\n", std::get<1>(scannerResult));
+		printf("error occur around INT %d ", std::get<1>(scannerResult));
 		break;
 	case 2:
-		printf("error occur around REAL %lf\n", std::get<2>(scannerResult));
+		printf("error occur around REAL %lf ", std::get<2>(scannerResult));
 		break;
 	}
+	printf("in line %d\n", get_current_row());
 }
 
 bool main_analyzer(vocabulary v, std::variant<char*, int, double> scannerResult) {
@@ -229,21 +233,21 @@ bool main_analyzer(vocabulary v, std::variant<char*, int, double> scannerResult)
 void start_analyze(FILE* fp) {
 	init_table();
 	init_scanner();
-	init_stack();
-	bool result = true;
+	init_stack(); // S will be put in the stack first
+	bool isSuccess = true;
 	while (true) {
 		if (main_scanner(fp)) {
 			if (feof(fp)) {
-				result &= main_analyzer(vocabulary(true, FIN), (char*)"final #");
+				isSuccess &= main_analyzer(vocabulary(true, FIN), (char*)"final #");
 				break;
 			}
 			if (getIgnore()) {
 				continue;
 			}
-			result &= main_analyzer(scannerLabelToAnalyzerLabel[getScanLabel()], getScanResult());
+			isSuccess &= main_analyzer(scannerLabelToAnalyzerLabel[getScanLabel()], getScanResult());
 		}
 	}
-	if (result) {
+	if (isSuccess) {
 		puts("Success Analyze!");
 	}
 }
