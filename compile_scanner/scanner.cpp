@@ -1,29 +1,6 @@
 #include "scanner.h"
 
-enum ClassLabel {
-    BEGIN = 1, // 1
-    END,       // 2
-    CONST,     // 3
-    VAR,       // 4
-    IF,        // 5
-    ELSE,      // 6
-    ID,        // 7
-    INT,       // 8
-    REAL,      // 9
-    LT,        // 10 <
-    LE,        // 11 <=
-    EQ,        // 12 =
-    NE,        // 13 <>
-    GT,        // 14 >
-    GE,        // 15 >=
-    IS,        // 16 :=
-    PL,        // 17 +
-    MI,        // 18 -
-    MU,        // 19 *
-    DI,        // 20 /
-    LBU,       // 21 (
-    RBU        // 22 )
-};
+using namespace scanner_label;
 
 char TOKEN[20];
 
@@ -248,11 +225,15 @@ void set_current_row(int startCount) {
     currentRow = startCount;
 }
 
+int get_current_row() {
+    return currentRow;
+}
+
 bool main_scanner(FILE* fp)
 {
     static char ch = '\0';
     int i, c;
-    setIgnore(false);
+    set_ignore(false);
     if (ch == EOF) {
         fseek(fp, 0, SEEK_END);
         getc(fp);
@@ -356,6 +337,9 @@ bool main_scanner(FILE* fp)
                 return false;
             }
             break;
+        case ';':
+            out(SEM, (char*)";");
+            break;
         case '+':
             out(PL, (char*)"+");
             break;
@@ -375,7 +359,7 @@ bool main_scanner(FILE* fp)
             out(RBU, (char*)")");
             break;
         default:
-            setIgnore(true);
+            set_ignore(true);
             if (ch == '\n') {
                 ++currentRow;
                 return true;

@@ -1,7 +1,6 @@
 #include "out.h"
 
-constexpr auto MAX_LABEL_NUMBER = 22;
-constexpr char* Labels[MAX_LABEL_NUMBER] = {
+constexpr char* Labels[MAX_SCANNER_LABEL_NUMBER] = {
     (char*)"BEGIN", (char*)"END", (char*)"CONST",
     (char*)"VAR", (char*)"IF", (char*)"ELSE",
     (char*)"ID", (char*)"INT", (char*)"REAL",
@@ -50,19 +49,19 @@ void out(int labelNum, double x) {
     preResult = x;
 }
 
-void setIgnore(bool x) {
+void set_ignore(bool x) {
     ignore = x;
 }
 
-bool getIgnore() {
+bool get_ignore() {
     return ignore;
 }
 
-int getScanLabel() {
+int get_scan_label() {
     return preLabelNum;
 }
 
-std::variant<char*, int, double> getScanResult() {
+std::variant<char*, int, double> get_scan_result() {
     return preResult; // notice: the validation of the return value is UNCHECKED!!
 }
 

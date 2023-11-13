@@ -6,16 +6,18 @@
 #include <cstring>
 #include <variant>
 
+#include "label.h"
+
 void set_outMode(int);
 
 void out(int, char*);
 void out(int, int);
 void out(int, double);
-void setIgnore(bool);
+void set_ignore(bool);
 
-bool getIgnore();
-int getScanLabel();
-std::variant<char*, int, double> getScanResult();
+bool get_ignore();
+int get_scan_label();
+std::variant<char*, int, double> get_scan_result();
 
 void report_error(char*, int);
 
