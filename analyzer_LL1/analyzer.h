@@ -2,7 +2,7 @@
 #ifndef _ANALYZER_H_
 #define _ANALYZER_H_
 
-#include "scanner.h"
+#include "..\compile_scanner\scanner.h"
 #include "analyzer_out.h"
 
 #include <vector>

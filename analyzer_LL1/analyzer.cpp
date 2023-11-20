@@ -83,22 +83,22 @@ void init_table() {
 	temp.emplace_back(vocabulary(false, E));
 	temp.emplace_back(vocabulary(true, SEM));
 	temp.emplace_back(vocabulary(false, Sp));
-	LL1Table[S].emplace_back(vocabulary(true, ID), temp);
-	LL1Table[S].emplace_back(vocabulary(true, LBU), temp);
+	LL1Table[S].emplace_back(vocabulary(true, ID), temp); // S i -> E;Sp
+	LL1Table[S].emplace_back(vocabulary(true, LBU), temp); // S ( -> E;Sp
 
 	temp.clear();
 	temp.emplace_back(vocabulary(true, SEM));
-	LL1Table[S].emplace_back(vocabulary(true, SEM), temp);
+	LL1Table[S].emplace_back(vocabulary(true, SEM), temp); // S ; -> ;
 
 	// Sp
 	temp.clear();
 	temp.emplace_back(vocabulary(false, S));
-	LL1Table[Sp].emplace_back(vocabulary(true, ID), temp);
-	LL1Table[Sp].emplace_back(vocabulary(true, LBU), temp);
-	LL1Table[Sp].emplace_back(vocabulary(true, SEM), temp);
+	LL1Table[Sp].emplace_back(vocabulary(true, ID), temp); // Sp i -> S
+	LL1Table[Sp].emplace_back(vocabulary(true, LBU), temp); // Sp ( -> S
+	LL1Table[Sp].emplace_back(vocabulary(true, SEM), temp); // Sp ; -> S
 
 	temp.clear();
-	LL1Table[Sp].emplace_back(vocabulary(true, FIN), temp);
+	LL1Table[Sp].emplace_back(vocabulary(true, FIN), temp); // Sp # -> eps
 
 	// E
 	temp.clear();

@@ -5,7 +5,7 @@
 #include <cstdio>
 #include <vector>
 
-#include "label.h"
+#include "..\compile_scanner\label.h"
 
 class vocabulary;
 
