@@ -1,5 +1,10 @@
 #include "scanner.h"
 
+#include <cctype>
+#include <cstring>
+#include <string>
+#include <variant>
+
 using namespace scanner_label;
 
 char TOKEN[20];

@@ -1,4 +1,8 @@
+#include "label.h"
 #include "out.h"
+
+#include <cstdio>
+#include <cstring>
 
 constexpr char* Labels[MAX_SCANNER_LABEL_NUMBER] = {
     (char*)"BEGIN", (char*)"END", (char*)"CONST",

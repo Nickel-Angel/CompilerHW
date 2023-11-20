@@ -3,10 +3,6 @@
 #define _SCANNER_H_
 
 #include <cstdio>
-#include <cctype>
-#include <cstring>
-#include <string>
-#include <variant>
 
 #include "label.h"
 #include "lookup.h"

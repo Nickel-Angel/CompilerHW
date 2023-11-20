@@ -1,4 +1,8 @@
+#include "..\compile_scanner\scanner.h"
 #include "analyzer.h"
+
+#include <vector>
+#include <variant>
 
 using namespace analyzer_label;
 using std::vector;
@@ -10,7 +14,7 @@ vector<pair<vocabulary, vector<vocabulary>>> LL1Table[MAX_VN];
 vocabulary scannerLabelToAnalyzerLabel[MAX_SCANNER_LABEL_NUMBER + 1]; // start from 1
 bool printProcess;
 
-class ananlyzerStack {
+class analyzerStack {
 private:
 	vocabulary Stack[MAX_STACK_SIZE];
 	int StackTop = 0;
@@ -61,7 +65,7 @@ public:
 	}
 };
 
-ananlyzerStack Stack;
+analyzerStack Stack;
 
 vocabulary::vocabulary() {
 	this->isTerminal = false;

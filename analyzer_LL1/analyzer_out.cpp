@@ -1,5 +1,8 @@
+#include "..\compile_scanner\label.h"
 #include "analyzer_out.h"
 #include "analyzer.h"
+
+#include <cstdio>
 
 using namespace analyzer_label;
 

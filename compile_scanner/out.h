@@ -2,11 +2,7 @@
 #ifndef _OUT_H_
 #define _OUT_H_
 
-#include <cstdio>
-#include <cstring>
 #include <variant>
-
-#include "label.h"
 
 void set_outMode(int);
 

@@ -1,5 +1,8 @@
 #include "dfa.h"
 
+#include <cstring>
+#include <cctype>
+
 // DFANode
 
 DFANode::DFANode() {

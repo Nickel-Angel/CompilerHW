@@ -2,12 +2,9 @@
 #ifndef _ANALYZER_H_
 #define _ANALYZER_H_
 
-#include "..\compile_scanner\scanner.h"
 #include "analyzer_out.h"
 
-#include <vector>
-#include <utility>
-#include <variant>
+#include <cstdio>
 
 struct vocabulary {
 	bool isTerminal;

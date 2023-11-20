@@ -1,5 +1,7 @@
 #include "lookup.h"
 
+#include <cstring>
+
 /* 建立保留字表 */
 constexpr auto MAX_KEY_NUMBER = 6;                          /*关键字的数量*/
 constexpr char* KeyWordTable[MAX_KEY_NUMBER] = {

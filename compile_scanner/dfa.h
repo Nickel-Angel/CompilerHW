@@ -2,8 +2,6 @@
 #ifndef _DFA_H_
 #define _DFA_H_
 
-#include <cstring>
-#include <cctype>
 #include <vector>
 
 using std::vector;
