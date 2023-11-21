@@ -14,7 +14,7 @@ constexpr int MAX_STACK_SIZE = 1000;
 
 vector<pair<vocabulary, vector<vocabulary>>> LL1Table[MAX_VN];
 vocabulary scannerLabelToAnalyzerLabel[MAX_SCANNER_LABEL_NUMBER + 1]; // start from 1
-bool printProcess;
+bool printProcess, translaterProcess;
 
 class analyzerStack {
 private:
@@ -149,6 +149,8 @@ bool main_analyzer(vocabulary indexed, std::variant<char*, int, double> scannerR
 					puts("");
 				}
 
+				push_terminal(indexed.labelNum, scannerResult);
+
 				Stack.pop();
 				return true;
 			}
@@ -173,7 +175,9 @@ bool main_analyzer(vocabulary indexed, std::variant<char*, int, double> scannerR
 			out(Stack.top(), fitProduction.second);
 			puts("");
 		}
-		productionAction(fitProductionNum, indexed.labelNum, scannerResult);
+
+		production_action(fitProductionNum);
+		
 		Stack.pop();
 		Stack.push(fitProduction.second);
 	}
@@ -181,6 +185,10 @@ bool main_analyzer(vocabulary indexed, std::variant<char*, int, double> scannerR
 
 void set_print_process(bool mode) {
 	printProcess = mode;
+}
+
+void set_translater_process(bool mode) {
+	translaterProcess = mode;
 }
 
 void start_analyze(FILE* fp) {

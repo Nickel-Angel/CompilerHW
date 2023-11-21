@@ -15,6 +15,7 @@ int main() {
 		err = fopen_s(&fp, filename, "r");
 	}
 	set_print_process(false);
+	set_translater_process(true);
 	start_analyze(fp);
 	fclose(fp);
 	return 0;

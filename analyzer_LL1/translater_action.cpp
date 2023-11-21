@@ -183,10 +183,19 @@ void push_terminal(int idType, identifier id) {
 		iStack.push(id);
 		return;
 	}
-	oStack.push(idType);
+	if (idType != RBU) {
+		oStack.push(idType);
+		return;
+	}
+	while (iStack.size() > 1 && oStack.top() != LBU) {
+		generateQuadruple();
+	}
+	if (oStack.top() == LBU) {
+		oStack.pop();
+	}
 }
 
-void productionAction(int productionNum, int idType, identifier id) {
+void production_action(int productionNum) {
 	switch (productionNum) {
 	case 5: // E' -> ATE'
 		while (iStack.size() > 1 && (oStack.top() == PL || oStack.top() == MI || // oStack.top() is ostack
@@ -204,21 +213,6 @@ void productionAction(int productionNum, int idType, identifier id) {
 			oStack.top() == MU || oStack.top() == DI)) {
 			generateQuadruple();
 		}
-		break;
-	case 11: // F -> i
-		iStack.push(id);
-		break;
-	case 12: // A -> +
-		ostack_push(idType);
-		break;
-	case 13: // A -> -
-		ostack_push(idType);
-		break;
-	case 14: // M -> *
-		ostack_push(idType);
-		break;
-	case 15: // M -> /
-		ostack_push(idType);
 		break;
 	default:
 		break;

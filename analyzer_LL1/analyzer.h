@@ -17,6 +17,7 @@ struct vocabulary {
 };
 
 void set_print_process(bool);
+void set_translater_process(bool);
 void start_analyze(FILE*);
 
 #endif // _ANALYZER_H_

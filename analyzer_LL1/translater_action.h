@@ -9,6 +9,7 @@ using std::variant;
 using identifier = variant<char*, int, double>;
 
 void init_translater();
-void productionAction(int, int, identifier);
+void push_terminal(int, identifier);
+void production_action(int);
 
 #endif // _TRANSLATER_ACTION_H_
