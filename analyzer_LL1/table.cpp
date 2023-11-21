@@ -164,12 +164,16 @@ void init_table() {
 	init_LL1_table();
 }
 
-production find_production(int labelNum, vocabulary indexed) {
-	auto &subTable = LL1Table[labelNum];
-	for (auto &[v, productionNumber] : subTable) {
+int find_productionNum(int labelNum, vocabulary indexed) {
+	auto& subTable = LL1Table[labelNum];
+	for (auto& [v, productionNumber] : subTable) {
 		if (v == indexed) {
-			return productionTable[productionNumber];
+			return productionNumber;
 		}
 	}
-	return { vocabulary(false, -1), vector<vocabulary>(0) };
+	return -1;
+}
+
+production find_productionByNum(int productionNum) {
+	return productionTable[productionNum];
 }

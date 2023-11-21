@@ -1,6 +1,7 @@
 #include "..\compile_scanner\scanner.h"
 #include "analyzer.h"
 #include "table.h"
+#include "translater_action.h"
 
 #include <vector>
 #include <variant>
@@ -18,12 +19,12 @@ bool printProcess;
 class analyzerStack {
 private:
 	vocabulary Stack[MAX_STACK_SIZE];
-	int StackTop = 0;
+	int stackTop = 0;
 
 public:
 	void push(vocabulary v) {
-		Stack[StackTop] = v;
-		++StackTop;
+		Stack[stackTop] = v;
+		++stackTop;
 	}
 
 	void push(vector<vocabulary> production) {
@@ -33,20 +34,20 @@ public:
 	}
 
 	vocabulary top() {
-		if (StackTop > 0) {
-			return Stack[StackTop - 1];
+		if (stackTop > 0) {
+			return Stack[stackTop - 1];
 		}
 		return vocabulary();
 	}
 
 	void pop() {
-		if (StackTop > 0) {
-			--StackTop;
+		if (stackTop > 0) {
+			--stackTop;
 		}
 	}
 
 	bool isempty() {
-		return StackTop == 0;
+		return stackTop == 0;
 	}
 
 	void print() {
@@ -54,13 +55,13 @@ public:
 	}
 
 	void print(int limit) {
-		for (int i = 0; i < StackTop; ++i) {
+		for (int i = 0; i < stackTop; ++i) {
 			out(Stack[i]);
 			if (!Stack[i].isTerminal && (Stack[i].labelNum == Sp || Stack[i].labelNum == Ep || Stack[i].labelNum == Tp)) {
 				--limit;
 			}
 		}
-		for (int i = StackTop; i < limit; ++i) {
+		for (int i = stackTop; i < limit; ++i) {
 			putchar(' ');
 		}
 	}
@@ -156,13 +157,15 @@ bool main_analyzer(vocabulary indexed, std::variant<char*, int, double> scannerR
 			return false;
 		}
 
-		production fitProduction = find_production(Stack.top().labelNum, indexed);
+		int fitProductionNum = find_productionNum(Stack.top().labelNum, indexed);
 		
-		if (fitProduction.first.labelNum == -1) {
+		if (fitProductionNum == -1) {
 			report_error(scannerResult);
 			return false;
 		}
 		
+		production fitProduction = find_productionByNum(fitProductionNum);
+
 		if (printProcess) { // process
 			Stack.print(12);
 			out(indexed);
@@ -170,6 +173,7 @@ bool main_analyzer(vocabulary indexed, std::variant<char*, int, double> scannerR
 			out(Stack.top(), fitProduction.second);
 			puts("");
 		}
+		productionAction(fitProductionNum, indexed.labelNum, scannerResult);
 		Stack.pop();
 		Stack.push(fitProduction.second);
 	}
@@ -184,6 +188,7 @@ void start_analyze(FILE* fp) {
 	init_label_switcher();
 	init_scanner();
 	init_analyzer_stack(); // S will be put in the stack first
+	init_translater();
 	bool isTotalSuccess = true;
 	bool isCurrentSuccess = true;
 	if (printProcess) {
