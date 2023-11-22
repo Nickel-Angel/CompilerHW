@@ -2,6 +2,7 @@
 #include "analyzer.h"
 #include "table.h"
 #include "translater_action.h"
+#include "analyzer_error.h"
 
 #include <vector>
 #include <variant>
@@ -124,22 +125,7 @@ void init_label_switcher() {
 	scannerLabelToAnalyzerLabel[scanner_label::SEM] = vocabulary(true, SEM);
 }
 
-void report_error(std::variant<char*, int, double> scannerResult) {
-	switch (scannerResult.index()) {
-	case 0:
-		printf("error occur around %s token ", std::get<0>(scannerResult));
-		break;
-	case 1:
-		printf("error occur around INT %d ", std::get<1>(scannerResult));
-		break;
-	case 2:
-		printf("error occur around REAL %lf ", std::get<2>(scannerResult));
-		break;
-	}
-	printf("in line %d\n", get_current_row());
-}
-
-bool main_analyzer(vocabulary indexed, std::variant<char*, int, double> scannerResult) {
+bool main_analyzer(vocabulary indexed, identifier scannerResult) {
 	while (true) {
 		if (Stack.top().isTerminal) {
 			if (Stack.top() == indexed) {
@@ -149,7 +135,9 @@ bool main_analyzer(vocabulary indexed, std::variant<char*, int, double> scannerR
 					puts("");
 				}
 
-				push_terminal(indexed.labelNum, scannerResult);
+				if (translaterProcess) {
+					push_terminal(indexed.labelNum, scannerResult);
+				}
 
 				Stack.pop();
 				return true;
@@ -162,7 +150,7 @@ bool main_analyzer(vocabulary indexed, std::variant<char*, int, double> scannerR
 		int fitProductionNum = find_productionNum(Stack.top().labelNum, indexed);
 		
 		if (fitProductionNum == -1) {
-			report_error(scannerResult);
+			report_error(Stack.top(), indexed, scannerResult);
 			return false;
 		}
 		
@@ -176,8 +164,10 @@ bool main_analyzer(vocabulary indexed, std::variant<char*, int, double> scannerR
 			puts("");
 		}
 
-		production_action(fitProductionNum);
-		
+		if (translaterProcess) {
+			production_action(fitProductionNum);
+		}
+
 		Stack.pop();
 		Stack.push(fitProduction.second);
 	}
