@@ -160,6 +160,10 @@ void generateQuadruple() {
 	int idType = oStack.top();
 	string tempVar;
 
+	res = "#T" + std::to_string(tempVarCount);
+	++tempVarCount;
+
+	/* Automatically calculate the arithmetic formulas that only have const values.
 	if (op2.index() == 0 || op1.index() == 0) {
 		res = "#T" + std::to_string(tempVarCount);
 		++tempVarCount;
@@ -168,6 +172,8 @@ void generateQuadruple() {
 	} else {
 		res = calcByType(std::get<int>(op1), std::get<int>(op2), idType);
 	}
+	*/
+
 	printQuadruple(oStack.top(), op1, op2, res);
 	oStack.pop();
 	iStack.push(res);
