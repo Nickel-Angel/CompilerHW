@@ -25,7 +25,7 @@ void expect_operator() {
 void report_error(identifier scannerResult) {
 	switch (scannerResult.index()) {
 	case 0:
-		printf("error occur around %s token ", std::get<0>(scannerResult));
+		printf("error occur around %s token ", std::get<0>(scannerResult).c_str());
 		break;
 	case 1:
 		printf("error occur around INT %d ", std::get<1>(scannerResult));

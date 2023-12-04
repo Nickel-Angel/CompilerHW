@@ -92,7 +92,7 @@ void init_translater() {
 void printIdentifier(const identifier &i) {
 	switch (i.index()) {
 	case 0:
-		printf("%s", std::get<0>(i));
+		printf("%s", std::get<0>(i).c_str());
 		break;
 	case 1:
 		printf("%d", std::get<1>(i));
@@ -161,8 +161,7 @@ void generateQuadruple() {
 	string tempVar;
 
 	if (op2.index() == 0 || op1.index() == 0) {
-		tempVar = "#T" + std::to_string(tempVarCount);
-		res = (char*)tempVar.c_str();
+		res = "#T" + std::to_string(tempVarCount);
 		++tempVarCount;
 	} else if (op2.index() == 2 || op1.index() == 2) {
 		res = calcByType(identifierToDouble(op1), identifierToDouble(op2), idType);

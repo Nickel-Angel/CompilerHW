@@ -93,7 +93,7 @@ public:
         SetTerminal(6, true);
     }
 
-    bool Query(char* token, double &x) {
+    bool Query(const char* token, double &x) {
         initState();
         x = 0;
         int length = strlen(token), preNode = 0, curNode = 0;
@@ -201,7 +201,7 @@ public:
         SetTerminal(4, true);
     }
 
-    bool Query(char* token, int& x) {
+    bool Query(const char* token, int& x) {
         initState();
         x = 0;
         int length = strlen(token), preNode = 0, curNode = 0;
@@ -260,7 +260,7 @@ bool main_scanner(FILE* fp)
         if (c == 0) {
             out(ID, TOKEN);
         } else {
-            out(c, (char*)" ");
+            out(c, " ");
         }
     } else if (isdigit(ch) || ch == '.') {
         TOKEN[0] = ch;
@@ -290,20 +290,20 @@ bool main_scanner(FILE* fp)
         fseek(fp, -1, 1);
         if (isReal) {
             double x = 0;
-            if (realDFA.Query((char*)TOKEN, x)) {
+            if (realDFA.Query(TOKEN, x)) {
                 out(REAL, x);
             } else {
                 std::string err = "Can't identify the real number ";
-                report_error((char*)((err + TOKEN).c_str()), currentRow);
+                report_error(((err + TOKEN).c_str()), currentRow);
                 return false;
             }
         } else {
             int x = 0;
-            if (intDFA.Query((char*)TOKEN, x)) {
+            if (intDFA.Query(TOKEN, x)) {
                 out(INT, x);
             } else {
                 std::string err = "Can't identify the Integer ";
-                report_error((char*)((err + TOKEN).c_str()), currentRow);
+                report_error(((err + TOKEN).c_str()), currentRow);
                 return false;
             }
         }
@@ -313,55 +313,55 @@ bool main_scanner(FILE* fp)
         case '<':
             ch = fgetc(fp);
             if (ch == '=') {
-                out(LE, (char*)"<=");
+                out(LE, "<=");
             } else if (ch == '£¾') {
-                out(NE, (char*)"<>");
+                out(NE, "<>");
             } else {
                 fseek(fp, -1, 1);
-                out(LT, (char*)"<");
+                out(LT, "<");
             }
             break;
         case '=':
-            out(EQ, (char*)"=");
+            out(EQ, "=");
             break;
         case '>':
             ch = fgetc(fp);
             if (ch == '=') {
-                out(GE, (char*)">=");
+                out(GE, ">=");
             } else {
                 fseek(fp, -1, 1);
-                out(GT, (char*)">");
+                out(GT, ">");
             }
             break;
         case ':':
             ch = fgetc(fp);
             if (ch == '=') {
-                out(IS, (char*)":=");
+                out(IS, ":=");
             } else {
-                report_error((char*)"expect = after token :", currentRow);
+                report_error("expect = after token :", currentRow);
                 return false;
             }
             break;
         case ';':
-            out(SEM, (char*)";");
+            out(SEM, ";");
             break;
         case '+':
-            out(PL, (char*)"+");
+            out(PL, "+");
             break;
         case '-':
-            out(MI, (char*)"-");
+            out(MI, "-");
             break;
         case '*':
-            out(MU, (char*)"*");
+            out(MU, "*");
             break;
         case '/':
-            out(DI, (char*)"/");
+            out(DI, "/");
             break;
         case '(':
-            out(LBU, (char*)"(");
+            out(LBU, "(");
             break;
         case ')':
-            out(RBU, (char*)")");
+            out(RBU, ")");
             break;
         default:
             set_ignore(true);
@@ -372,7 +372,7 @@ bool main_scanner(FILE* fp)
             if (ch == EOF || ch == ' ' || ch == '\r' || ch == '\0' || ch == '\t') {
                 return true;
             }
-            report_error((char*)"unknown identifier", currentRow);
+            report_error("unknown identifier", currentRow);
             return false;
             break;
         }

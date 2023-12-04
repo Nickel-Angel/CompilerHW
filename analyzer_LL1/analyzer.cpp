@@ -10,6 +10,7 @@
 using namespace analyzer_label;
 using std::vector;
 using std::pair;
+using std::string;
 
 constexpr int MAX_STACK_SIZE = 1000;
 
@@ -195,7 +196,7 @@ void start_analyze(FILE* fp) {
 	while (true) {
 		if (main_scanner(fp)) {
 			if (feof(fp)) {
-				isCurrentSuccess &= main_analyzer(vocabulary(true, FIN), (char*)"final #");
+				isCurrentSuccess &= main_analyzer(vocabulary(true, FIN), "final #");
 				isTotalSuccess &= isCurrentSuccess;
 				break;
 			}

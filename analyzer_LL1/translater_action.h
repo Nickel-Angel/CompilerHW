@@ -3,10 +3,11 @@
 #define _TRANSLATER_ACTION_H_
 
 #include <variant>
+#include <string>
 
 using std::variant;
 
-using identifier = variant<char*, int, double>;
+using identifier = variant<std::string, int, double>;
 
 void init_translater();
 void push_terminal(int, identifier);

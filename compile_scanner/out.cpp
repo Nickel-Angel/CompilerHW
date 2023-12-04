@@ -18,7 +18,7 @@ constexpr char* Labels[MAX_SCANNER_LABEL_NUMBER] = {
 static bool ignore;
 static int outMode = 0; // 0: stdout 1: load
 static int preLabelNum;
-static std::variant<char*, int, double> preResult;
+static std::variant<std::string, int, double> preResult;
 
 void set_outMode(int mode) {
     if (mode == (outMode ^ 1)) {
@@ -26,7 +26,7 @@ void set_outMode(int mode) {
     }
 }
 
-void out(int labelNum, char* id) {
+void out(int labelNum, const char* id) {
     if (outMode == 0) {
         printf("(%s, %s)\n", Labels[labelNum - 1], id);
         return;
@@ -65,10 +65,10 @@ int get_scan_label() {
     return preLabelNum;
 }
 
-std::variant<char*, int, double> get_scan_result() {
+std::variant<std::string, int, double> get_scan_result() {
     return preResult; // notice: the validation of the return value is UNCHECKED!!
 }
 
-void report_error(char* error, int currentRow) {
+void report_error(const char* error, int currentRow) {
     printf("%s on line %d\n", error, currentRow);
 }

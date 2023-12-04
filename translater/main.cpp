@@ -9,6 +9,7 @@ int main() {
 	// printf("Please input source file name:\n");
 	// scanf_s("%s", filename, 9);
 	errno_t err = fopen_s(&fp, filename, "r");
+	// freopen_s(&resultFlow, "result.txt", "w", stdout);
 	while (err != 0) {
 		printf("Fail to Open the file, please check your file name.\n");
 		scanf_s("%s", filename);
