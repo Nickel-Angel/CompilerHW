@@ -1,5 +1,5 @@
 #include "..\compile_scanner\label.h"
-#include "translater_action.h"
+#include "translator_action.h"
 #include "analyzer_out.h"
 #include "analyzer.h"
 
@@ -75,11 +75,11 @@ public:
 	}
 };
 
-identifierStack iStack;
+identifierStack iStack; 
 operatorStack oStack;
 int tempVarCount;
 
-void init_translater() {
+void init_translator() {
 	tempVarCount = 0;
 	while (!iStack.isempty()) {
 		iStack.pop();

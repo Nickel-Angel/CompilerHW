@@ -1,7 +1,7 @@
 #include "..\compile_scanner\scanner.h"
 #include "analyzer.h"
 #include "table.h"
-#include "translater_action.h"
+#include "translator_action.h"
 #include "analyzer_error.h"
 
 #include <vector>
@@ -187,7 +187,7 @@ void start_analyze(FILE* fp) {
 	init_label_switcher();
 	init_scanner();
 	init_analyzer_stack(); // S will be put in the stack first
-	init_translater();
+	init_translator();
 	bool isTotalSuccess = true;
 	bool isCurrentSuccess = true;
 	if (printProcess) {

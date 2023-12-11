@@ -3,7 +3,7 @@
 #define _ANALYZER_ERROR_H_
 
 #include "analyzer.h"
-#include "translater_action.h"
+#include "translator_action.h"
 
 void report_error(identifier);
 void report_error(vocabulary, vocabulary, identifier);
